@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId    Int     @id @default(autoincrement())
+  userName  String  @unique
+  passWord  String
+  firstName String?
+  lastName  String?
+  email     String  @unique
+  phone     String?
+  planId    Int?    @map("planId")
+  Plan      Plan?   @relation(fields: [planId], references: [planId])
+  Review Review[]
+}
+
+model Plan {
+  planId     Int       @id @default(autoincrement())
+  name       String
+  budget     Float
+  locationId Int       @map("locationId")
+  Location   Location  @relation(fields: [locationId], references: [locationId])
+  Users User[]
+}
+
+model Location {
+  locationId  Int           @id @default(autoincrement())
+  name        String
+  description String?
+  categoryId  Int           @map("categoryId")
+  Category    Category      @relation(fields: [categoryId], references: [categoryId])
+
+  Plan           Plan[]
+  LocationScore  LocationScore[]
+  ProductImg     ProductImg[]
+}
+
+model Category {
+  categoryId Int       @id @default(autoincrement())
+  name       String
+
+  Locations Location[]
+}
+
+model LocationScore {
+  scoreId     Int       @id @default(autoincrement())
+  score       Float
+  locationId  Int       @map("locationId")
+  Location    Location  @relation(fields: [locationId], references: [locationId])
+}
+
+model ProductImg {
+  id          Int       @id @default(autoincrement())
+  url         String
+  locationId  Int       @map("locationId")
+  Location    Location  @relation(fields: [locationId], references: [locationId])
+}
+
+model Review {
+  reviewId  Int       @id @default(autoincrement())
+  placeName String
+  comment   String
+  createdAt DateTime  @default(now())
+  userId    Int       @map("userId")
+  User      User      @relation(fields: [userId], references: [userId])
+
+  ReviewRating ReviewRating[]
+  ReviewImg    ReviewImg[]
+}
+
+model ReviewRating {
+  ratingId Int      @id @default(autoincrement())
+  score    Float
+  reviewId Int      @map("reviewId")
+  Review   Review   @relation(fields: [reviewId], references: [reviewId])
+}
+
+model ReviewImg {
+  imgId    Int      @id @default(autoincrement())
+  url      String
+  reviewId Int      @map("reviewId")
+  Review   Review   @relation(fields: [reviewId], references: [reviewId])
+}
