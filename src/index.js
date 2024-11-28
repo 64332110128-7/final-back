@@ -6,6 +6,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+console.log("Halo")
 
 app.get("/test", (req, res) => {
   res.json({ message: "Server is working fine!" });

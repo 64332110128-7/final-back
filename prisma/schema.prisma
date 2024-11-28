@@ -11,82 +11,81 @@ datasource db {
 }
 
 model User {
-  userId    Int     @id @default(autoincrement())
-  userName  String  @unique
-  passWord  String
+  userId    Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
   firstName String?
   lastName  String?
-  email     String  @unique
+  email     String   @unique
   phone     String?
-  planId    Int?    @map("planId")
-  Plan      Plan?   @relation(fields: [planId], references: [planId])
-  Review Review[]
+  Plan      Plan[]
+  Review    Review[]
 }
 
 model Plan {
-  planId     Int       @id @default(autoincrement())
-  name       String
-  budget     Float
-  locationId Int       @map("locationId")
-  Location   Location  @relation(fields: [locationId], references: [locationId])
-  Users User[]
+  planId   Int        @id @default(autoincrement())
+  name     String
+  budget   Float
+  user     User       @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  userId   Int
+  Location Location[]
 }
 
 model Location {
-  locationId  Int           @id @default(autoincrement())
-  name        String
-  description String?
-  categoryId  Int           @map("categoryId")
-  Category    Category      @relation(fields: [categoryId], references: [categoryId])
-
-  Plan           Plan[]
-  LocationScore  LocationScore[]
-  ProductImg     ProductImg[]
+  locationId    Int             @id @default(autoincrement())
+  name          String
+  description   String
+  plan          Plan            @relation(fields: [planId], references: [planId], onDelete: Cascade, onUpdate: Cascade)
+  planId        Int
+  Category      Category        @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade, onUpdate: Cascade)
+  categoryId    Int
+  LocationScore LocationScore[]
+  ProductImg    ProductImg[]
 }
 
 model Category {
-  categoryId Int       @id @default(autoincrement())
+  categoryId Int    @id @default(autoincrement())
   name       String
 
   Locations Location[]
 }
 
 model LocationScore {
-  scoreId     Int       @id @default(autoincrement())
-  score       Float
-  locationId  Int       @map("locationId")
-  Location    Location  @relation(fields: [locationId], references: [locationId])
+  scoreId    Int      @id @default(autoincrement())
+  score      Int
+  Location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  locationId Int
 }
 
 model ProductImg {
-  id          Int       @id @default(autoincrement())
-  url         String
-  locationId  Int       @map("locationId")
-  Location    Location  @relation(fields: [locationId], references: [locationId])
+  id         Int      @id @default(autoincrement())
+  url        String
+  Location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  locationId Int
 }
 
 model Review {
-  reviewId  Int       @id @default(autoincrement())
+  reviewId  Int      @id @default(autoincrement())
   placeName String
-  comment   String
-  createdAt DateTime  @default(now())
-  userId    Int       @map("userId")
-  User      User      @relation(fields: [userId], references: [userId])
+  comment   String?
+  date      DateTime @default(now())
+  userId    Int
+  User      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 
   ReviewRating ReviewRating[]
   ReviewImg    ReviewImg[]
 }
 
 model ReviewRating {
-  ratingId Int      @id @default(autoincrement())
-  score    Float
-  reviewId Int      @map("reviewId")
-  Review   Review   @relation(fields: [reviewId], references: [reviewId])
+  ratingId Int    @id @default(autoincrement())
+  score    Int
+  Review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
+  reviewId Int
 }
 
 model ReviewImg {
-  imgId    Int      @id @default(autoincrement())
+  imgId    Int    @id @default(autoincrement())
   url      String
-  reviewId Int      @map("reviewId")
-  Review   Review   @relation(fields: [reviewId], references: [reviewId])
+  Review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
+  reviewId Int
 }
