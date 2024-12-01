@@ -78,7 +78,7 @@ exports.login = async (req, res, next) => {
       return createError(401, "Email or password is invalid");
     }
 
-    const token = jwt.sign({ id: isUserExist.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: isUserExist.userId }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
 

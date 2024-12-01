@@ -10,56 +10,62 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   userId    Int      @id @default(autoincrement())
+  role      Role     @default(USER)
   password  String
   firstName String?
   lastName  String?
   phone     String?
   email     String   @unique
-  Plan      Plan[]
-  Review    Review[]
+  plan      Plan[]
+  review    Review[]
 }
 
 model Plan {
-  planId   Int        @id @default(autoincrement())
-  name     String
-  budget   Float
-  user     User       @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
-  userId   Int
-  Location Location[]
+  planId     Int      @id @default(autoincrement())
+  name       String
+  budget     Float
+  user       User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  userId     Int
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  locationId Int
 }
 
 model Location {
   locationId    Int             @id @default(autoincrement())
   name          String
   description   String
-  plan          Plan            @relation(fields: [planId], references: [planId], onDelete: Cascade, onUpdate: Cascade)
-  planId        Int
-  Category      Category        @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade, onUpdate: Cascade)
+  category      Category        @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade, onUpdate: Cascade)
   categoryId    Int
-  LocationScore LocationScore[]
-  ProductImg    ProductImg[]
+  locationScore LocationScore[]
+  locationImg   LocationImg[]
+  plan          Plan[]
 }
 
 model Category {
   categoryId Int    @id @default(autoincrement())
   name       String
 
-  Locations Location[]
+  locations Location[]
 }
 
 model LocationScore {
   scoreId    Int      @id @default(autoincrement())
   score      Int
-  Location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
 }
 
-model ProductImg {
+model LocationImg {
   id         Int      @id @default(autoincrement())
   url        String
-  Location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
 }
 
@@ -69,22 +75,22 @@ model Review {
   comment   String?
   date      DateTime @default(now())
   userId    Int
-  User      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
 
-  ReviewRating ReviewRating[]
-  ReviewImg    ReviewImg[]
+  reviewRating ReviewRating[]
+  reviewImg    ReviewImg[]
 }
 
 model ReviewRating {
   ratingId Int    @id @default(autoincrement())
   score    Int
-  Review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
+  review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
   reviewId Int
 }
 
 model ReviewImg {
   imgId    Int    @id @default(autoincrement())
   url      String
-  Review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
+  review   Review @relation(fields: [reviewId], references: [reviewId], onDelete: Cascade, onUpdate: Cascade)
   reviewId Int
 }
