@@ -9,5 +9,5 @@ router.post(
   adminController.createLocation
 );
 router.post("/category", adminController.createCategory);
-
+router.patch("/location/:locationId", adminController.updateLocation)
 module.exports = router;

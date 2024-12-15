@@ -53,15 +53,60 @@ exports.createLocation = async (req, res, next) => {
 };
 
 exports.createCategory = async (req, res, next) => {
-    try {
-      const { name } = req.body;
-      const Category = await prisma.category.create({
-        data: {
-          name,
+  try {
+    const { name } = req.body;
+    const Category = await prisma.category.create({
+      data: {
+        name,
+      },
+    });
+    res.json({ Category });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateLocation = async (req, res, next) => {
+  try {
+    const { locationId } = req.params;
+    const value = await updateLocationSchema.validateAsync(req.body);
+
+    if (value.categoryId) {
+      const existCate = await prisma.category.findUnique({
+        where: {
+          categoryId: Number(value.categoryId),
         },
       });
-      res.json({ Category });
-    } catch (err) {
-      next(err);
+
+      if (!existCate) {
+        return createError(400, "Category is invalid");
+      }
     }
-  };
+
+    const existLocation = await prisma.location.findUnique({
+      where: {
+        locationId: Number(locationId),
+      },
+    });
+
+    if (!existLocation) {
+      return next(createError(404, "Location not found"));
+    }
+
+    const location = await prisma.location.update({
+      where: {
+        locationId: Number(locationId),
+      },
+      data: {
+        ...value,
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    res.json({ location });
+  } catch (err) {
+    next(err);
+  }
+};
