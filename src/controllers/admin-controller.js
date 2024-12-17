@@ -118,7 +118,6 @@ exports.deleteLocation = async (req, res, next) => {
   const { locationId } = req.params;
 
   try {
-    // ตรวจสอบว่า Location มีอยู่จริง
     const location = await prisma.location.findUnique({
       where: { locationId: Number(locationId) },
       include: { locationImg: true },
@@ -128,29 +127,24 @@ exports.deleteLocation = async (req, res, next) => {
       return next(createError(404, "Location not found"));
     }
 
-    // ลบรูปภาพจาก Cloudinary และโฟลเดอร์ uploads
     const imageUrls = location.locationImg.map((img) => img.url);
     const deleteImageTasks = imageUrls.map(async (url) => {
       try {
-        // ลบจาก Cloudinary
         await cloudDelete(url);
 
-        // ลบไฟล์จากโฟลเดอร์ uploads
-        const filename = path.basename(url); // ดึงชื่อไฟล์จาก URL
+        const filename = path.basename(url);
         const filePath = path.join(__dirname, "../uploads", filename);
-        await fs.unlink(filePath); // ลบไฟล์จากระบบ
+        await fs.unlink(filePath);
       } catch (err) {
         console.error(`Failed to delete file: ${url}`, err);
       }
     });
     await Promise.all(deleteImageTasks);
 
-    // ลบข้อมูลรูปภาพจากฐานข้อมูล
     await prisma.locationImg.deleteMany({
       where: { locationId: location.locationId },
     });
 
-    // ลบ Location
     const deletedLocation = await prisma.location.delete({
       where: { locationId: Number(locationId) },
     });
