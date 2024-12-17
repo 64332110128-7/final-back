@@ -10,4 +10,5 @@ router.post(
 );
 router.post("/category", adminController.createCategory);
 router.patch("/location/:locationId", adminController.updateLocation)
+router.delete("/location/:locationId", adminController.deleteLocation)
 module.exports = router;
