@@ -43,3 +43,45 @@ exports.getLocationsById = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getLocations = async (req, res, next) => {
+  try {
+    const { name } = req.query;
+
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: "Name is required and cannot be empty." });
+    }
+
+    const locations = await prisma.location.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: name,
+            },
+          },
+          {
+            category: {
+              name: {
+                contains: name,
+              },
+            },
+          },
+        ],
+      },
+      include: {
+        category: true,
+        locationImg: true,
+        locationScore: true,
+      },
+    });
+
+    if (locations.length === 0) {
+      return createError(404, "Location not found");
+    }
+
+    res.json({ locations });
+  } catch (err) {
+    next(err);
+  }
+};
