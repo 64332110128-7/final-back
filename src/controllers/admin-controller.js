@@ -69,6 +69,31 @@ exports.createCategory = async (req, res, next) => {
   }
 };
 
+exports.getCategory = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+    if (!categoryId) {
+      return next(createError(400, "Category ID is required"));
+    }
+    const locations = await prisma.location.findMany({
+      where: {
+        categoryId: Number(categoryId),
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    if (locations.length === 0) {
+      return next(createError(404, "No locations found for the category"));
+    }
+
+    res.json({ locations });
+  } catch (err) {
+    next(err);
+  }
+};
+
 exports.updateLocation = async (req, res, next) => {
   try {
     const { locationId } = req.params;
