@@ -43,6 +43,7 @@ model Location {
   description   String
   category      Category        @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade, onUpdate: Cascade)
   categoryId    Int
+  map           String?
   locationScore LocationScore[]
   locationImg   LocationImg[]
   plan          Plan[]
