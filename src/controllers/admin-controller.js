@@ -81,6 +81,7 @@ exports.getCategory = async (req, res, next) => {
       },
       include: {
         category: true,
+        locationImg: true,
       },
     });
 
