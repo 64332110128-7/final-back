@@ -5,6 +5,9 @@ exports.createLocationSchema = Joi.object({
   description: Joi.string(),
   categoryId: Joi.number(),
   map: Joi.string(),
+  address: Joi.string(),
+  phone: Joi.string(),
+  date: Joi.string(),
 });
 
 exports.updateLocationSchema = Joi.object({
@@ -12,4 +15,7 @@ exports.updateLocationSchema = Joi.object({
   description: Joi.string(),
   categoryId: Joi.number(),
   map: Joi.string(),
+  address: Joi.string(),
+  phone: Joi.string(),
+  date: Joi.string(),
 });
