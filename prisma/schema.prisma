@@ -40,7 +40,7 @@ model Plan {
 model Location {
   locationId    Int             @id @default(autoincrement())
   name          String
-  description   String
+  description   String          @db.VarChar(5000)
   category      Category        @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade, onUpdate: Cascade)
   categoryId    Int
   map           String?
