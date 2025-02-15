@@ -84,6 +84,7 @@ model LocationScore {
 model LocationImg {
   id         Int      @id @default(autoincrement())
   url        String
+  filename   String?   @unique
   location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
 }

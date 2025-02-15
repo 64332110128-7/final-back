@@ -12,7 +12,6 @@ const {
 exports.createLocation = async (req, res, next) => {
   try {
     const value = await createLocationSchema.validateAsync(req.body);
-
     const { categoryId } = req.body;
 
     const Location = await prisma.location.create({
@@ -22,24 +21,22 @@ exports.createLocation = async (req, res, next) => {
       },
     });
 
-    const imagesPromiseArray = req.files.map((file) => {
-      return cloudUpload(file.path);
-    });
+    const productImages = await Promise.all(
+      req.files.map(async (file) => {
+        const cloudUrl = await cloudUpload(file.path);
+        return {
+          url: cloudUrl,
+          filename: file.filename,
+          locationId: Location.locationId,
+        };
+      })
+    );
 
-    const imgUrlArray = await Promise.all(imagesPromiseArray);
-
-    const productImages = imgUrlArray.map((imgUrl) => {
-      return {
-        url: imgUrl,
-        locationId: Location.locationId,
-      };
-    });
-
-    await prisma.LocationImg.createMany({
+    await prisma.locationImg.createMany({
       data: productImages,
     });
 
-    const newLocation = await prisma.Location.findFirst({
+    const newLocation = await prisma.location.findFirst({
       where: {
         locationId: Location.locationId,
       },
@@ -153,18 +150,25 @@ exports.deleteLocation = async (req, res, next) => {
       return next(createError(404, "Location not found"));
     }
 
-    const imageUrls = location.locationImg.map((img) => img.url);
-    const deleteImageTasks = imageUrls.map(async (url) => {
+    const deleteImageTasks = location.locationImg.map(async (img) => {
       try {
-        await cloudDelete(url);
+        await cloudDelete(img.url);
 
-        const filename = path.basename(url);
-        const filePath = path.join(__dirname, "../uploads", filename);
-        await fs.unlink(filePath);
+        const filePath = path.join(process.cwd(), "uploads", img.filename);
+        console.log(`Checking file: ${filePath}`);
+
+        try {
+          await fs.access(filePath);
+          await fs.unlink(filePath);
+          console.log(`Deleted file: ${filePath}`);
+        } catch (err) {
+          console.warn(`File not found or can't delete: ${filePath}`, err);
+        }
       } catch (err) {
-        console.error(`Failed to delete file: ${url}`, err);
+        console.error(`Failed to delete image: ${img.url}`, err);
       }
     });
+
     await Promise.all(deleteImageTasks);
 
     await prisma.locationImg.deleteMany({
@@ -175,9 +179,8 @@ exports.deleteLocation = async (req, res, next) => {
       where: { locationId: Number(locationId) },
     });
 
-    res.json({ msg: "Delete success", result: deletedLocation });
+    res.json({ msg: "✅ Delete success", result: deletedLocation });
   } catch (err) {
     next(err);
   }
 };
-
