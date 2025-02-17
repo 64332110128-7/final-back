@@ -9,17 +9,14 @@ const path = require("path");
 exports.getLocationsLanding = async (req, res, next) => {
   try {
     const locations = await prisma.location.findMany({
-      select: {
-        averageScore: true,
-        name: true,
-        description: true,
+      include: {
         category: true,
         locationImg: true,
         locationScore: true,
       },
     });
-    if (!locations) {
-      return createError(404, "Location not found");
+    if (!locations || locations.length === 0) {
+      return res.status(404).json({ message: "Location not found" });
     }
     res.json({ locations });
   } catch (err) {
@@ -30,30 +27,25 @@ exports.getLocationsLanding = async (req, res, next) => {
 exports.getLocationsById = async (req, res, next) => {
   try {
     const { locationId } = req.params;
-    const location = await prisma.location.findFirst({
+    const location = await prisma.location.findUnique({
       where: {
         locationId: Number(locationId),
       },
-      select: {
-        averageScore: true,
-        name: true,
-        description: true,
+      include: {
         category: true,
         locationImg: true,
         locationScore: true,
       },
     });
     if (!location) {
-      return createError(404, "Location ID not found");
-    }
-    if (location === null) {
-      return createError(400, "Location ID = " + locationId + " have no item");
+      return res.status(404).json({ message: "Location ID not found" });
     }
     res.json({ location });
   } catch (err) {
     next(err);
   }
 };
+
 
 exports.getLocations = async (req, res, next) => {
   try {
