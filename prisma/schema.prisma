@@ -50,6 +50,8 @@ model Location {
   date          String?
   budget        Budget?
   price         Int?
+  latitude      Float?
+  longitude     Float?
   locationScore LocationScore[]
   locationImg   LocationImg[]
   plan          Plan[]
@@ -77,20 +79,20 @@ model LocationImg {
   locationId Int
   location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
 }
+
 model LocationScore {
-  scoreId    Int      @id @default(autoincrement())
+  scoreId    Int             @id @default(autoincrement())
   score      Int
   userId     Int
-  user       User?    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  user       User?           @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
-  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  location   Location        @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
   commentId  Int
   comment    LocationComment @relation(fields: [commentId], references: [commentId], onDelete: Cascade)
-  createdAt  DateTime @default(now())
+  createdAt  DateTime        @default(now())
 
   @@unique([userId, locationId])
 }
-
 
 model LocationComment {
   commentId  Int                  @id @default(autoincrement())
