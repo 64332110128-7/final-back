@@ -16,15 +16,15 @@ enum Role {
 }
 
 model User {
-  userId    Int               @id @default(autoincrement())
-  role      Role              @default(USER)
-  password  String
-  firstName String?
-  lastName  String?
-  phone     String?
-  email     String            @unique
-  plan      Plan[]
-  comments  LocationComment[]
+  userId        Int               @id @default(autoincrement())
+  role          Role              @default(USER)
+  password      String
+  firstName     String?
+  lastName      String?
+  phone         String?
+  email         String            @unique
+  plan          Plan[]
+  comments      LocationComment[]
   locationScore LocationScore[]
 }
 
@@ -50,11 +50,11 @@ model Location {
   date          String?
   budget        Budget?
   price         Int?
-  averageScore  Float?
   locationScore LocationScore[]
   locationImg   LocationImg[]
   plan          Plan[]
   comments      LocationComment[]
+  averageScore  Float?            @map("average_score")
 }
 
 enum Budget {
@@ -70,24 +70,28 @@ model Category {
   locations Location[]
 }
 
-model LocationScore {
-  scoreId    Int      @id @default(autoincrement())
-  score      Int
-  user       User?    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
-  userId     Int?
-  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
-  locationId Int
-  createdAt  DateTime @default(now())
-}
-
-
 model LocationImg {
   id         Int      @id @default(autoincrement())
   url        String
-  filename   String?   @unique
-  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  filename   String?  @unique
   locationId Int
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
 }
+model LocationScore {
+  scoreId    Int      @id @default(autoincrement())
+  score      Int
+  userId     Int
+  user       User?    @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  locationId Int
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  commentId  Int
+  comment    LocationComment @relation(fields: [commentId], references: [commentId], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, locationId])
+}
+
+
 model LocationComment {
   commentId  Int                  @id @default(autoincrement())
   text       String               @db.VarChar(3000)
@@ -97,11 +101,16 @@ model LocationComment {
   locationId Int
   location   Location             @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
   images     LocationCommentImg[]
+  parentId   Int?
+  parent     LocationComment?     @relation("CommentThread", fields: [parentId], references: [commentId], onDelete: Cascade)
+  replies    LocationComment[]    @relation("CommentThread")
+  scores     LocationScore[]
 }
 
 model LocationCommentImg {
   imgId     Int             @id @default(autoincrement())
   url       String
+  filename  String?         @unique
   commentId Int
   comment   LocationComment @relation(fields: [commentId], references: [commentId], onDelete: Cascade, onUpdate: Cascade)
 }

@@ -21,7 +21,7 @@ exports.createLocation = async (req, res, next) => {
       },
     });
 
-    const productImages = await Promise.all(
+    const locationImages = await Promise.all(
       req.files.map(async (file) => {
         const cloudUrl = await cloudUpload(file.path);
         return {
@@ -33,7 +33,7 @@ exports.createLocation = async (req, res, next) => {
     );
 
     await prisma.locationImg.createMany({
-      data: productImages,
+      data: locationImages,
     });
 
     const newLocation = await prisma.location.findFirst({
