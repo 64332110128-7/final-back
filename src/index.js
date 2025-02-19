@@ -8,8 +8,9 @@ const authenticate = require("./middlewares/authenticate");
 const admin = require("./middlewares/admin");
 const authRoute = require("./routes/auth-route");
 const adminRoute = require("./routes/admin-route");
-const user = require("./routes/user-route")
-const location = require("./routes/location-route")
+const user = require("./routes/user-route");
+const location = require("./routes/location-route");
+const plan = require("./routes/plan-route");
 
 const app = express();
 
@@ -19,7 +20,8 @@ app.use(express.json());
 app.use("/auth", authRoute);
 app.use("/admin", authenticate, admin, adminRoute);
 app.use("/user", authenticate, user);
-app.use("/location", location)
+app.use("/location", location);
+app.use("/plan", plan);
 
 app.use(errorHandler);
 app.use("*", notFoundHandler);

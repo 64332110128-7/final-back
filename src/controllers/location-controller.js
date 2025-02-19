@@ -459,6 +459,8 @@ exports.getComments = async (req, res, next) => {
         },
         include: {
           user: true,
+          scores: true,
+          images: true,
         },
       });
 

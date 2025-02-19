@@ -29,13 +29,21 @@ model User {
 }
 
 model Plan {
-  planId     Int      @id @default(autoincrement())
-  name       String
-  budget     Float
-  user       User     @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
-  userId     Int
-  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
+  planId        Int             @id @default(autoincrement())
+  name          String?
+  budget        Float?
+  day           String?
+  user          User            @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  userId        Int
+  plan_location Plan_location[]
+}
+
+model Plan_location {
+  id         Int      @id @default(autoincrement())
+  planId     Int
+  plan       Plan     @relation(fields: [planId], references: [planId], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
+  location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Location {
@@ -52,11 +60,11 @@ model Location {
   price         Int?
   latitude      Float?
   longitude     Float?
+  averageScore  Float?            @map("average_score")
   locationScore LocationScore[]
   locationImg   LocationImg[]
-  plan          Plan[]
   comments      LocationComment[]
-  averageScore  Float?            @map("average_score")
+  Plan_location Plan_location[]
 }
 
 enum Budget {

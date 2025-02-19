@@ -15,12 +15,20 @@ CREATE TABLE `User` (
 -- CreateTable
 CREATE TABLE `Plan` (
     `planId` INTEGER NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(191) NOT NULL,
-    `budget` DOUBLE NOT NULL,
+    `name` VARCHAR(191) NULL,
+    `budget` DOUBLE NULL,
     `userId` INTEGER NOT NULL,
-    `locationId` INTEGER NOT NULL,
 
     PRIMARY KEY (`planId`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Plan_location` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `planId` INTEGER NOT NULL,
+    `locationId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -101,7 +109,10 @@ CREATE TABLE `LocationCommentImg` (
 ALTER TABLE `Plan` ADD CONSTRAINT `Plan_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`userId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Plan` ADD CONSTRAINT `Plan_locationId_fkey` FOREIGN KEY (`locationId`) REFERENCES `Location`(`locationId`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `Plan_location` ADD CONSTRAINT `Plan_location_planId_fkey` FOREIGN KEY (`planId`) REFERENCES `Plan`(`planId`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Plan_location` ADD CONSTRAINT `Plan_location_locationId_fkey` FOREIGN KEY (`locationId`) REFERENCES `Location`(`locationId`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Location` ADD CONSTRAINT `Location_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `Category`(`categoryId`) ON DELETE CASCADE ON UPDATE CASCADE;
