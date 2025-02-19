@@ -232,3 +232,57 @@ exports.getPlan = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.getPlanById = async (req, res, next) => {
+  try {
+    const { planId } = req.params;
+
+    if (!planId) {
+      return res.status(400).json({ error: "Missing required parameter: planId" });
+    }
+
+    const plan = await prisma.plan.findUnique({
+      where: { planId: Number(planId) },
+      include: {
+        plan_location: {
+          include: {
+            location: {
+              include: {
+                category: true,
+                locationImg: true,
+                locationScore: {
+                  include: {
+                    user: {
+                      select: {
+                        userId: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            userId: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!plan) {
+      return res.status(404).json({ error: "Plan not found" });
+    }
+
+    res.json({ plan });
+  } catch (err) {
+    next(err);
+  }
+};

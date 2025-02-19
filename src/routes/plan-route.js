@@ -10,6 +10,7 @@ router.delete(
   authenticate,
   planController.deleteLocation
 );
+router.get("/:planId", planController.getPlanById);
 router.delete("/:planId", authenticate, planController.deletePlan);
 router.patch("/:planId", authenticate, planController.editPlan);
 router.get("/:userId", planController.getPlan);
