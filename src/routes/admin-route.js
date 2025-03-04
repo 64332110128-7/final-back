@@ -9,7 +9,11 @@ router.post(
   adminController.createLocation
 );
 router.post("/category", adminController.createCategory);
-router.patch("/location/:locationId", adminController.updateLocation)
+router.patch(
+  "/location/:locationId",
+  upload.array("Images", 10),
+  adminController.updateLocation
+);
 router.delete("/location/:locationId", adminController.deleteLocation)
 router.get("/category/:categoryId", adminController.getCategory)
 module.exports = router;

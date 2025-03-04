@@ -103,23 +103,21 @@ exports.updateLocation = async (req, res, next) => {
           categoryId: Number(value.categoryId),
         },
       });
-
       if (!existCate) {
-        return createError(400, "Category is invalid");
+        return next(createError(400, "Category is invalid"));
       }
     }
 
-    const existLocation = await prisma.location.findUnique({
-      where: {
-        locationId: Number(locationId),
-      },
+    const existingLocation = await prisma.location.findUnique({
+      where: { locationId: Number(locationId) },
+      include: { locationImg: true },
     });
 
-    if (!existLocation) {
+    if (!existingLocation) {
       return next(createError(404, "Location not found"));
     }
 
-    const location = await prisma.location.update({
+    const updatedLocation = await prisma.location.update({
       where: {
         locationId: Number(locationId),
       },
@@ -127,6 +125,54 @@ exports.updateLocation = async (req, res, next) => {
         ...value,
       },
       include: {
+        category: true,
+      },
+    });
+
+    if (req.files && req.files.length > 0) {
+      const deleteImageTasks = existingLocation.locationImg.map(async (img) => {
+        try {
+          await cloudDelete(img.url);
+          const filePath = path.join(process.cwd(), "uploads", img.filename);
+          console.log(`Checking file: ${filePath}`);
+
+          try {
+            await fs.access(filePath);
+            await fs.unlink(filePath);
+            console.log(`Deleted file: ${filePath}`);
+          } catch (err) {
+            console.warn(`File not found or can't delete: ${filePath}`, err);
+          }
+        } catch (err) {
+          console.error(`Failed to delete image: ${img.url}`, err);
+        }
+      });
+      await Promise.all(deleteImageTasks);
+
+      await prisma.locationImg.deleteMany({
+        where: { locationId: Number(locationId) },
+      });
+
+      const newImages = await Promise.all(
+        req.files.map(async (file) => {
+          const cloudUrl = await cloudUpload(file.path);
+          return {
+            url: cloudUrl,
+            filename: file.filename,
+            locationId: Number(locationId),
+          };
+        })
+      );
+
+      await prisma.locationImg.createMany({
+        data: newImages,
+      });
+    }
+
+    const location = await prisma.location.findUnique({
+      where: { locationId: Number(locationId) },
+      include: {
+        locationImg: true,
         category: true,
       },
     });
