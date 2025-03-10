@@ -64,9 +64,7 @@ exports.addLocation = async (req, res, next) => {
     const { planId, locationId } = req.body;
 
     if (!planId || !locationId) {
-      return res
-        .status(400)
-        .json({ error: "Missing required fields: planId or locationId" });
+      return res.status(400).json({ error: "Missing required fields: planId or locationId" });
     }
 
     const plan = await prisma.plan.findUnique({
@@ -77,18 +75,62 @@ exports.addLocation = async (req, res, next) => {
       return res.status(404).json({ error: "Plan not found" });
     }
 
-    const planLocation = await prisma.plan_location.createMany({
-      data: locationId.map((locationId) => ({
-        planId: planId,
-        locationId,
-      })),
-      skipDuplicates: true,
+    if (Array.isArray(locationId)) {
+      const existingLocations = await prisma.plan_location.findMany({
+        where: {
+          planId: Number(planId),
+          locationId: { in: locationId.map(Number) },
+        },
+      });
+
+      const newLocations = locationId
+        .map(Number)
+        .filter((id) => !existingLocations.some((loc) => loc.locationId === id));
+
+      if (newLocations.length > 0) {
+        await prisma.plan_location.createMany({
+          data: newLocations.map((id) => ({
+            planId: Number(planId),
+            locationId: id,
+          })),
+        });
+      }
+
+      return res.json({
+        message: "✅ Location(s) added to plan",
+        added: newLocations,
+        existing: existingLocations.map((loc) => loc.locationId),
+      });
+    }
+
+    const existingLocation = await prisma.plan_location.findFirst({
+      where: {
+        planId: Number(planId),
+        locationId: Number(locationId),
+      },
     });
-    res.json({ message: "Location added to cart successfully", planLocation });
+
+    if (existingLocation) {
+      return res.json({ 
+        message: "✅ Location already exists in plan", 
+        existingLocation 
+      });
+    }
+
+    const newPlanLocation = await prisma.plan_location.create({
+      data: {
+        planId: Number(planId),
+        locationId: Number(locationId),
+      },
+    });
+
+    res.json({ message: "✅ Location added to plan", newPlanLocation });
   } catch (err) {
     next(err);
   }
 };
+
+
 
 exports.deleteLocation = async (req, res, next) => {
   try {

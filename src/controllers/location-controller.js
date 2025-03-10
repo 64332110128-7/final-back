@@ -93,6 +93,13 @@ exports.getLocations = async (req, res, next) => {
 
 let decisionTree;
 
+const getSeason = (date) => {
+  const month = new Date(date).getMonth() + 1;
+  if ([3, 4, 5].includes(month)) return "SUMMER";
+  if ([6, 7, 8, 9].includes(month)) return "RAINY";
+  return "WINTER";
+};
+
 const trainModel = async () => {
   try {
     const locations = await prisma.location.findMany();
@@ -121,7 +128,7 @@ trainModel();
 
 exports.mlLocation = async (req, res, next) => {
   try {
-    const { budget, categoryId } = req.body;
+    const { budget, categoryId, startDate, endDate } = req.body;
 
     if (!decisionTree)
       return res.status(500).json({ error: "Model is not trained yet" });
@@ -131,11 +138,13 @@ exports.mlLocation = async (req, res, next) => {
     }
 
     let budgetValue = budget === "LOW" ? 0 : budget === "MEDIUM" ? 1 : 2;
+    let season = startDate ? getSeason(startDate) : null;
 
     if (!categoryId) {
       const locations = await prisma.location.findMany({
         where: {
           budget: budget.toUpperCase(),
+          season: season ? season.toUpperCase() : undefined,
         },
         include: {
           category: true,
@@ -159,6 +168,7 @@ exports.mlLocation = async (req, res, next) => {
       where: {
         budget: budget.toUpperCase(),
         categoryId: categoryToSearch,
+        season: season ? season.toUpperCase() : undefined,
       },
       include: {
         category: true,

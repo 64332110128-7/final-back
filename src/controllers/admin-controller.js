@@ -12,7 +12,18 @@ const {
 exports.createLocation = async (req, res, next) => {
   try {
     const value = await createLocationSchema.validateAsync(req.body);
-    const { categoryId } = req.body;
+    const { name, categoryId } = req.body;
+
+    // ตรวจสอบว่า location ชื่อนี้มีอยู่แล้วหรือไม่
+    const existingLocation = await prisma.location.findFirst({
+      where: {
+        name: value.name,
+      },
+    });
+
+    if (existingLocation) {
+      return res.status(400).json({ message: "สถานที่นี้มีอยู่แล้วในระบบ" });
+    }
 
     const Location = await prisma.location.create({
       data: {
@@ -51,6 +62,7 @@ exports.createLocation = async (req, res, next) => {
     next(err);
   }
 };
+
 
 exports.createCategory = async (req, res, next) => {
   try {

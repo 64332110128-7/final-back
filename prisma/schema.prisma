@@ -57,6 +57,7 @@ model Location {
   phone         String?
   date          String?
   budget        Budget?
+  season        Season?
   price         Int?
   latitude      Float?
   longitude     Float?
@@ -71,6 +72,12 @@ enum Budget {
   LOW
   MEDIUM
   HIGH
+}
+
+enum Season {
+  SUMMER
+  RAINY
+  WINTER
 }
 
 model Category {
