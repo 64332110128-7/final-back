@@ -5,11 +5,7 @@ const planController = require("../controllers/plan-controller");
 
 router.post("/createPlan/:userId", planController.createPlan);
 router.post("/plan-location", planController.addLocation);
-router.delete(
-  "/:planId/plan_location/:locationId",
-  authenticate,
-  planController.deleteLocation
-);
+router.delete("/:planId/planDays/:planDayId/locations/:locationId", authenticate, planController.deleteLocation);
 router.delete("/:planId", authenticate, planController.deletePlan);
 router.patch("/:planId", authenticate, planController.editPlan);
 router.get("/:planId", planController.getPlanById);

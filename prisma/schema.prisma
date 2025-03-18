@@ -29,23 +29,31 @@ model User {
 }
 
 model Plan {
-  planId        Int             @id @default(autoincrement())
-  name          String?
-  budget        Float?
-  day           String?
-  user          User            @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
-  userId        Int
-  plan_location Plan_location[]
+  planId   Int       @id @default(autoincrement())
+  name     String?
+  budget   Float?
+  startDate DateTime
+  endDate   DateTime
+  userId   Int
+  user     User      @relation(fields: [userId], references: [userId], onDelete: Cascade, onUpdate: Cascade)
+  planDays PlanDay[]
+}
+
+model PlanDay {
+  id       Int       @id @default(autoincrement())
+  day      Int       
+  planId   Int
+  plan     Plan      @relation(fields: [planId], references: [planId], onDelete: Cascade, onUpdate: Cascade)
+  locations Plan_location[]
 }
 
 model Plan_location {
   id         Int      @id @default(autoincrement())
-  planId     Int
-  plan       Plan     @relation(fields: [planId], references: [planId], onDelete: Cascade, onUpdate: Cascade)
+  planDayId  Int
+  planDay    PlanDay  @relation(fields: [planDayId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   locationId Int
   location   Location @relation(fields: [locationId], references: [locationId], onDelete: Cascade, onUpdate: Cascade)
 }
-
 model Location {
   locationId    Int               @id @default(autoincrement())
   name          String
