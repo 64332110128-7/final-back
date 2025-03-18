@@ -210,21 +210,21 @@ exports.editPlan = async (req, res, next) => {
   try {
     const { planId } = req.params;
     const userId = req.user.userId;
-    const { name, startDate, endDate } = req.body;
+    const { name, budget, startDate, endDate } = req.body;
 
     if (!userId) {
       return res.status(401).json({ error: "Unauthorized" });
     }
 
-    if (!name && !budget && !day) {
+    if (!name && budget === undefined && !startDate && !endDate) {
       return res.status(400).json({
-        error: "At least one field (name, budget, day) is required",
+        error: "At least one field (name, budget, startDate, endDate) is required",
       });
     }
 
     const plan = await prisma.plan.findUnique({
       where: { planId: Number(planId) },
-      select: { userId: true, planDays: true },
+      select: { userId: true, startDate: true, endDate: true, planDays: true },
     });
 
     if (!plan) {
@@ -241,18 +241,18 @@ exports.editPlan = async (req, res, next) => {
 
     const currentDays = plan.planDays.length;
 
+
     if (newTotalDays > currentDays) {
-      const newPlanDays = [];
       for (let i = currentDays; i < newTotalDays; i++) {
-        const newPlanDay = await prisma.planDay.create({
+        await prisma.planDay.create({
           data: {
             planId: Number(planId),
             day: i + 1,
           },
         });
-        newPlanDays.push(newPlanDay);
       }
-    } 
+    }
+
     else if (newTotalDays < currentDays) {
       for (let i = currentDays; i > newTotalDays; i--) {
         await prisma.planDay.delete({
@@ -265,12 +265,14 @@ exports.editPlan = async (req, res, next) => {
       where: { planId: Number(planId) },
       data: {
         name: name || undefined,
+        budget: budget !== undefined ? Number(budget) : undefined,
         startDate: newStartDate,
         endDate: newEndDate,
       },
       select: {
         planId: true,
         name: true,
+        budget: true,
         startDate: true,
         endDate: true,
       },
@@ -284,6 +286,7 @@ exports.editPlan = async (req, res, next) => {
     next(err);
   }
 };
+
 
 exports.getPlanById = async (req, res, next) => {
   try {
